@@ -21,7 +21,7 @@ from .ondiskcache import OnDiskCache
 from .classifier import AcademicPaperFilter
 import hashlib
 from time import sleep
-from Levenshtein import ratio
+#from Levenshtein import ratio
 
 urls_cache = OnDiskCache('urls_cache.pkl')
 paper_filter = AcademicPaperFilter()
@@ -97,6 +97,9 @@ class TemplateEdit(object):
             if already_oa_param in ['doi']:
                 # We'll need to double check the publisher URL.
                 pass
+            elif already_oa_param in ['hdl']:
+                # We still want to add PMC if available, as hdl-access does not autolink.
+                pass
             else:
                 # The status quo is good enough.
                 return
@@ -150,9 +153,25 @@ class TemplateEdit(object):
                         self.classification = 'subscription_ignored'
                     else:
                         # Probably the existing link is closed.
-                        self.proposed_change += "url-access=subscription|"
-                        self.classification = 'registration_subscription'
-                        self.keep_existing_url(old_url)
+                        if is_blacklisted(old_url):
+                            # Catch DOIs which redirect to a redirect, like linkinghub.elsevier.com
+                            self.classification = 'registration_subscription'
+                            self.proposed_change += "url-access=subscription|"
+                        else:
+                            # Ignore links which are not publisher links
+                            try:
+                                head = SESSION.head('https://doi.org/{}'.format(doi), timeout=1)
+                            except requests.exceptions.RequestException:
+                                print("WARNING: Request to doi.org failed")
+                                head = None
+                            if head and head.headers.get('Location', None) and urlparse(head.headers.get('Location', None)).hostname not in old_url:
+                                # The old URL may be a repository link which Unpaywall forgot.
+                                self.classification = 'subscription_ignored'
+                                self.keep_existing_url(old_url)
+                            else:
+                                self.classification = 'registration_subscription'
+                                self.proposed_change += "url-access=subscription|"
+                        
                 elif oa_status == "unknown":
                     # We queried Dissemin on top of Unpaywall and no result
                     self.classification = 'subscription_ignored'
@@ -198,7 +217,7 @@ class TemplateEdit(object):
                 if argmap.name == 'hdl':
                     self.proposed_change += "hdl-access=free|"
                     # don't change anything else
-                    # TODO: Consider still adding PMC is available
+                    # TODO: Consider still adding PMC if available
                     return
                 if argmap.name == 'url':
                     # We may want to change the URL. Propose it after cleanup.

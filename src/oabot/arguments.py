@@ -77,7 +77,7 @@ class ArgumentMapping(object):
         Convert the URL into an equivalent which is more suitable for comparison and ranks.
         """
         if 'babel.hathitrust.org' in url:
-            return unquote(re.sub(r"https://babel\.hathitrust\.org/cgi/imgsrv/download/pdf\?id=([^;]+).*",
+            return unquote(re.sub(r"https://babel[.]hathitrust[.]org/cgi/imgsrv/download/pdf\?id=([^;]+).*",
                           r"https://hdl.handle.net/2027/\1",
                           url))
         return url
@@ -92,7 +92,7 @@ class ArgumentMapping(object):
             return None
         return match.group(self.group_id)
 
-url_pdf_extension_re = re.compile(r'.*\.pdf([\?#].*)?$', re.IGNORECASE)
+url_pdf_extension_re = re.compile(r'.*[.]pdf([\?#].*)?$', re.IGNORECASE)
 class UrlArgumentMapping(ArgumentMapping):
     def present_and_free(self, template):
         val = self.get(template)
@@ -104,27 +104,27 @@ class UrlArgumentMapping(ArgumentMapping):
 
 doi_argument = ArgumentMapping(
         'doi',
-        r'https?://(dx\.)?doi\.org/([^ ]*)',
+        r'https?://(dx[.])?doi[.]org/([^ ]*)',
         group_id=2,
         alternate_names=['DOI'],
         custom_access=True)
 
 hdl_argument = ArgumentMapping(
         'hdl',
-        r'https?://hdl\.handle\.net/([^ ]*)',
+        r'https?://hdl[.]handle[.]net/([^ ]*)',
         alternate_names=['HDL'],
         custom_access=True)
 
 arxiv_argument = ArgumentMapping(
         'arxiv',
-        r'https?://arxiv\.org/(abs|pdf)/(\d+\.[\d]+|[a-z-]+/\d+)(v\d+)?(\.pdf)?',
+        r'https?://arxiv[.]org/(abs|pdf)/(\d+[.][\d]+|[a-z-]+/\d+)(v\d+)?([.]pdf)?',
         group_id=2,
         alternate_names=['eprint','ARXIV','arXiv'],
         always_free=True)
 
 pmc_argument = ArgumentMapping(
         'pmc',
-        r'https?://www\.ncbi\.nlm\.nih\.gov/pmc/articles/PMC([^/]*)/?',
+        r'https?://www[.]ncbi[.]nlm[.]nih[.]gov/pmc/articles/(?:PMC)?([^/]*)/?',
         alternate_names=['PMC'],
         always_free=True)
 eupmc_argument = ArgumentMapping(
@@ -134,7 +134,7 @@ eupmc_argument = ArgumentMapping(
         always_free=True)
 pmid_argument = ArgumentMapping(
         'pmid',
-        r'https?://www\.ncbi\.nlm\.nih\.gov/pubmed/([^/]*)[^0-9]*',
+        r'https?://www[.]ncbi[.]nlm[.]nih[.]gov/pubmed/([^/]*)[^0-9]*',
         alternate_names=['PMID'],
         custom_access=True)
 eupmid_argument = ArgumentMapping(
@@ -144,7 +144,7 @@ eupmid_argument = ArgumentMapping(
         custom_access=True)
 citeseerx_argument = ArgumentMapping(
         'citeseerx',
-        r'https?://citeseerx\.ist\.psu\.edu/(?:doc/|viewdoc/(?:summary|download)\?doi=)([0-9.]*)(&.*)?',
+        r'https?://citeseerx[.]ist[.]psu[.]edu/(?:doc/|viewdoc/(?:summary|download)\?doi=)([0-9.]*)(&.*)?',
         alternate_names=['CITESEERX'],
         group_id=1,
         always_free=True)

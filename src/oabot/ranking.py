@@ -3,11 +3,12 @@
 import re
 from urllib.parse import urlparse
 
-rg_re = re.compile('(https?://www\.researchgate\.net/)(.*)(publication/[0-9]*)_.*/links/[0-9a-f]*.pdf')
+rg_re = re.compile('(https?://www[.]researchgate[.]net/)(.*)(publication/[0-9]*)_.*/links/[0-9a-f]*.pdf')
 
 # This section defines a priority order on the links retrieved from APIs
 domain_priority = {
         'ncbi.nlm.nih.gov': 50,        # PubMed or PubMed Central: official version too, preferred for links.
+        'www.ncbi.nlm.nih.gov': 50,
         'doi.org': 40,                 # Links to the publisher's version in most of the cases
         'dx.doi.org': 40,              # Links to the publisher's version in most of the cases
         'arxiv.org' : 30,              # Curated repository
@@ -71,6 +72,7 @@ domain_blacklist = [
     'journals.uchicago.edu',
     'jwildlifedis.org',
     'karger.com',
+    'linkinghub.elsevier.com',
     'link.aps.org',
     'link.springer.com',
     'microbiologyresearch.org',
@@ -124,6 +126,8 @@ domains_no_subscription = [
     'adsabs.harvard.edu',
     'archive.org',
     'biodiversitylibrary.org',
+    'dib.ie',
+    'eudml.org',
     'nih.gov',
     'persee.fr',
     'researchgate.net',
